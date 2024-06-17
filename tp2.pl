@@ -1,7 +1,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Tablero
 %%%%%%%%%%%%%%%%%%%%%%%%
-
+tablero(ej5x5, T) :-
+tablero(5, 5, T),
+ocupar(pos(1, 1), T),
+ocupar(pos(1, 2), T).
+tablero(libre20, T) :-
+tablero(20, 20, T).
 %% Ejercicio 1
 %% tablero(+Filas,+Columnas,-Tablero) instancia una estructura de tablero en blanco
 %% de Filas x Columnas, con todas las celdas libres.
@@ -37,12 +42,30 @@ nth0(N, [_|Xs], Y) :-
 %% un átomo de la forma pos(F', C') y pos(F',C') sea una celda contigua a
 %% pos(F,C), donde Pos=pos(F,C). Las celdas contiguas puede ser a lo sumo cuatro
 %% dado que el robot se moverá en forma ortogonal.
-vecino(_,_,_).
+vecino(pos(F, C), Tablero, pos(F1, C)) :-
+    F1 is F + 1,
+    length(Tablero, N),
+    F1 < N.
+vecino(pos(F, C), Tablero, pos(F, C1)) :-
+    C1 is C + 1,
+    length(Tablero, N),
+    C1 < N.
+vecino(pos(F, C), Tablero, pos(F1, C)) :-
+    F1 is F - 1,
+    F1 >= 0.
+vecino(pos(F, C), Tablero, pos(F, C1)) :-
+    C1 is C - 1,
+    C1 >= 0
+.
 
 %% Ejercicio 4
 %% vecinoLibre(+Pos, +Tablero, -PosVecino) idem vecino/3 pero además PosVecino
 %% debe ser una celda transitable (no ocupada) en el Tablero
-vecinoLibre(_,_,_).
+vecinoLibre(pos(F, C), T, pos(F1,C1)) :-
+    vecino(pos(F, C), T, pos(F1, C1)),
+    nth0(F1, T, Fila),
+    nth0(C1, Fila, Celda),
+    var(Celda).
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Definicion de caminos
