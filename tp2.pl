@@ -54,21 +54,19 @@ indicesValidos(F, C, Tablero) :-
 % N es el length del tablero 
 
 % derecha
-vecino(pos(F, C), Tablero, pos(F1, C)) :-
-    F1 is F + 1,
+vecino(pos(F, C), Tablero, pos(F1, C)) :- F1 is F + 1,
     length(Tablero, N),
     F1 < N.
 % abajo
-vecino(pos(F, C), Tablero, pos(F, C1)) :-
-    C1 is C + 1,
+vecino(pos(F, C), Tablero, pos(F, C1)) :- C1 is C + 1,
     length(Tablero, N),
     C1 < N.
 % izquierda
-vecino(pos(F, C), Tablero, pos(F1, C)) :-
+vecino(pos(F, C), _, pos(F1, C)) :-
     F1 is F - 1,
     F1 >= 0.
 % arriba
-vecino(pos(F, C), Tablero, pos(F, C1)) :-
+vecino(pos(F, C), _, pos(F, C1)) :-
     C1 is C - 1,
     C1 >= 0.
 
@@ -80,8 +78,8 @@ vecinoLibre(pos(F, C), T, pos(F1,C1)) :-
     estaLibre(pos(F1, C1), T).
 
 estaLibre(pos(F, C), T) :-
-    iesimoElemento(F, T, Fila),
-    iesimoElemento(C, Fila, Celda),
+    nth0(F, T, Fila),
+    nth0(C, Fila, Celda),
     var(Celda). % Celda es de la forma _
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -168,6 +166,8 @@ caminoOptimo(Inicio,Fin,Tablero,C1) :- camino(Inicio, Fin, Tablero, C1), length(
                                             not((caminoConLong(Inicio, Fin, Tablero, C2, L2), L2<L1)).
 caminoConLong(Inicio, Fin, Tablero, C2, L2) :- camino(Inicio, Fin, Tablero, C2), length(C2, L2).
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Tableros simultáneos
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -176,7 +176,22 @@ caminoConLong(Inicio, Fin, Tablero, C2, L2) :- camino(Inicio, Fin, Tablero, C2),
 %% caminoDual(+Inicio, +Fin, +Tablero1, +Tablero2, -Camino) será verdadero
 %% cuando Camino sea un camino desde Inicio hasta Fin pasando al mismo tiempo
 %% sólo por celdas transitables de ambos tableros.
-caminoDual(_,_,_,_,_).
+%% caminoDual(+Inicio, +Fin, +Tablero1, +Tablero2, -Camino) 
+%% Camino es un camino desde Inicio hasta Fin pasando sólo por celdas transitables en ambos tableros.
+
+caminoDual(Inicio, Fin, Tablero1, Tablero2, Camino) :-
+    % chequeo de dimensiones
+    caminoDual_aux(Inicio, Fin, Tablero1, Tablero2, [Inicio], Camino).
+
+% llegue al final
+caminoDual_aux(Fin, Fin, _, _, Visitados, Camino) :- reverse(Visitados, Camino).
+% sigo buscando
+caminoDual_aux(Actual, Fin, T1, T2, Visitados, Camino):-
+    vecinoLibre(Actual, T1, Siguiente), % en alguna iteracion Siguiente va a ser Fin ->> Fin esta libre
+    estaLibre(Siguiente, T2),
+    not(member(Siguiente, Visitados)),
+    caminoDual_aux(Siguiente, Fin, T1, T2, [Siguiente|Visitados], Camino).
+
 
 %%%%%%%%
 %% TESTS
