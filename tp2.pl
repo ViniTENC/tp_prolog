@@ -1,12 +1,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Tablero
 %%%%%%%%%%%%%%%%%%%%%%%%
+
 tablero(ej5x5, T) :-
 tablero(5, 5, T),
 ocupar(pos(1, 1), T),
 ocupar(pos(1, 2), T).
 tablero(libre20, T) :-
 tablero(20, 20, T).
+
 %% Ejercicio 1
 %% tablero(+Filas,+Columnas,-Tablero) instancia una estructura de tablero en blanco
 %% de Filas x Columnas, con todas las celdas libres.
@@ -42,6 +44,7 @@ nth0(N, [_|Xs], Y) :-
 %% un átomo de la forma pos(F', C') y pos(F',C') sea una celda contigua a
 %% pos(F,C), donde Pos=pos(F,C). Las celdas contiguas puede ser a lo sumo cuatro
 %% dado que el robot se moverá en forma ortogonal.
+% N es el length del tablero 
 vecino(pos(F, C), Tablero, pos(F1, C)) :-
     F1 is F + 1,
     length(Tablero, N),
@@ -63,8 +66,12 @@ vecino(pos(F, C), Tablero, pos(F, C1)) :-
 %% debe ser una celda transitable (no ocupada) en el Tablero
 vecinoLibre(pos(F, C), T, pos(F1,C1)) :-
     vecino(pos(F, C), T, pos(F1, C1)),
-    nth0(F1, T, Fila),
-    nth0(C1, Fila, Celda),
+    estaLibre(pos(F1, C1), T).
+
+
+estaLibre(pos(F, C), T) :-
+    nth0(F, T, Fila),
+    nth0(C, Fila, Celda),
     var(Celda).
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -79,17 +86,78 @@ vecinoLibre(pos(F, C), T, pos(F1,C1)) :-
 %% Notar que la cantidad de caminos es finita y por ende se tiene que poder recorrer
 %% todas las alternativas eventualmente.
 %% Consejo: Utilizar una lista auxiliar con las posiciones visitadas
-camino(_,_,_,_).
+camino(Inicio, Fin, Tablero, Camino) :-
+    % [Inicio] es la lista de posiciones visitadas
+    % agregar check de si Inicio/Fin estan ocupados; si lo estan, no hay camino
+    estaLibre(Inicio, Tablero),
+    caminoAux(Inicio, Fin, Tablero, [Inicio], Camino).
+
+caminoAux(Fin, Fin, Tablero, Visitados, Camino) :- reverse(Visitados, Camino).
+
+caminoAux(Actual, Fin, Tablero, Visitados, Camino):-
+    vecinoLibre(Actual, Tablero, Siguiente),
+    not(member(Siguiente, Visitados)),
+    caminoAux(Siguiente, Fin, Tablero, [Siguiente|Visitados], Camino).
+
 
 %% 5.1. Analizar la reversibilidad de los parámetros Fin y Camino justificando adecuadamente en cada
 %% caso por qué el predicado se comporta como lo hace
 
-
+% Fin es reversible, podemos dejarla sin instanciar y encuentra los caminos desde cada inicio.
+% Camino parece no ser reversible (por lo que probamos en la terminal), esta raro hay que chequear :p xd
 
 %% Ejercicio 6
 %% camino2(+Inicio, +Fin, +Tablero, -Camino) ídem camino/4 pero que las soluciones
 %% se instancien en orden creciente de longitud.
-camino2(_,_,_,_).
+
+% listaDeCaminos(Inicio,Fin,Tablero,[Caminos]
+
+caminoMasCorto(Inicio,Fin,Tablero,C1) :- camino(Inicio, Fin, Tablero, C1), length(C1, L1),
+                                            not((caminoConLong(Inicio, Fin, Tablero, C2, L2), L2<L1)).
+caminoConLong(Inicio, Fin, Tablero, C2, L2) :- camino(Inicio, Fin, Tablero, C2), length(C2, L2).
+
+
+camino2(Inicio, Fin, Tablero, Camino) :-
+    setof(C, caminoMasCorto(Inicio, Fin, Tablero, C), Camino)
+
+% CAMINO 3 FUNCIONA PERO USA FINDALL, MEDIO CHEAT POR AHI
+camino3(Inicio, Fin, Tablero, Camino) :-
+    bfs([[Inicio]], Fin, Tablero, Camino).
+
+bfs([[Fin|Visitados]|_], Fin, _, Camino) :-
+    reverse([Fin|Visitados], Camino).
+
+bfs([Visitados|Cola], Fin, Tablero, Camino) :-
+    Visitados = [Actual|_],
+    findall([Vecino|Visitados],
+            (vecinoLibre(Actual, Tablero, Vecino), \+ member(Vecino, Visitados)),
+            NuevosCaminos),
+    append(Cola, NuevosCaminos, NuevaCola),
+    bfs(NuevaCola, Fin, Tablero, Camino).
+    
+%%%%
+camino4(Inicio, Fin, Tablero, Camino) :-
+    bfs([[Inicio]], Fin, Tablero, [], Camino).
+
+bfs([[Fin|Visitados]|_], _, _, _, Camino) :-
+    reverse([Fin|Visitados], Camino).
+
+bfs([Visitados|Cola], Fin, Tablero, VisitadosPrevios, Camino) :-
+    Visitados = [Actual|_],
+    setof([Vecino|Visitados],
+          (vecinoLibre(Actual, Tablero, Vecino),
+           \+ member(Vecino, Visitados),
+           \+ member([Vecino|Visitados], VisitadosPrevios)),
+          NuevosCaminos),
+    append(VisitadosPrevios, NuevosCaminos, NuevosVisitadosPrevios),
+    append(Cola, NuevosCaminos, NuevaCola),
+    bfs(NuevaCola, Fin, Tablero, NuevosVisitadosPrevios, Camino).
+
+bfs([Visitados|Cola], Fin, Tablero, VisitadosPrevios, Camino) :-
+    Visitados = [Actual|_],
+    Actual \= Fin,
+    bfs(Cola, Fin, Tablero, VisitadosPrevios, Camino).
+
 
 %% 6.1. Analizar la reversibilidad de los parámetros Inicio y Camino justificando adecuadamente en
 %% cada caso por qué el predicado se comporta como lo hace.
@@ -98,7 +166,9 @@ camino2(_,_,_,_).
 %% Ejercicio 7
 %% caminoOptimo(+Inicio, +Fin, +Tablero, -Camino) será verdadero cuando Camino sea un
 %% camino óptimo sobre Tablero entre Inicio y Fin. Notar que puede no ser único.
-caminoOptimo(_,_,_,_).
+caminoOptimo(Inicio,Fin,Tablero,C1) :- camino(Inicio, Fin, Tablero, C1), length(C1, L1),
+                                            not((caminoConLong(Inicio, Fin, Tablero, C2, L2), L2<L1)).
+caminoConLong(Inicio, Fin, Tablero, C2, L2) :- camino(Inicio, Fin, Tablero, C2), length(C2, L2).
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Tableros simultáneos
