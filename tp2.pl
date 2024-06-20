@@ -32,38 +32,19 @@ crear_fila(M, [_|Resto]) :-
 %% Ejercicio 2
 %% ocupar(+Pos,?Tablero) será verdadero cuando la posición indicada esté ocupada.
 
-% pos(F, C).
-% ocupar(pos(F, C), Tablero) :-
-%     nth0(F, Tablero, Fila),
-%     nth0(C, Fila, ocupada).
-
-% nth0(0, [X|_], X).
-% nth0(N, [_|Xs], Y) :-
-%     N > 0,
-%     N1 is N - 1,
-%     nth0(N1, Xs, Y).
-
-%alternativa
-
-iesimoElemento(0, [Elem|_], Elem).
-iesimoElemento(N, [_|Elems], Elem) :- 
-    N > 0,
-    N1 is N - 1,
-    iesimoElemento(N1, Elems, Elem).
+ocupar(pos(F,C), Tablero) :- 
+    indicesValidos(F,C,Tablero),
+    nth0(F, Tablero, Fila),
+    nth0(C, Fila, ocupada).    
 
 indicesValidos(F, C, Tablero) :-
     length(Tablero, N),
     F >= 0,
     C >= 0,
     F < N,
-    iesimoElemento(F, Tablero, Fila),
+    nth0(F, Tablero, Fila),
     length(Fila, M),
     C < M.
-
-ocupar(pos(F,C), Tablero) :- 
-    indicesValidos(F,C,Tablero),
-    iesimoElemento(F, Tablero, Fila),
-    iesimoElemento(C, Fila, ocupada).    
 
 %% Ejercicio 3
 %% vecino(+Pos, +Tablero, -PosVecino) será verdadero cuando PosVecino sea
@@ -101,7 +82,7 @@ vecinoLibre(pos(F, C), T, pos(F1,C1)) :-
 estaLibre(pos(F, C), T) :-
     iesimoElemento(F, T, Fila),
     iesimoElemento(C, Fila, Celda),
-    var(Celda). % es de la forma _
+    var(Celda). % Celda es de la forma _
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Definicion de caminos
@@ -118,44 +99,57 @@ estaLibre(pos(F, C), T) :-
 
 camino(Inicio, Fin, Tablero, Camino) :-
     estaLibre(Inicio, Tablero),
-    estaLibre(Fin, Tablero),
+    % estaLibre(Fin, Tablero), esto permite que Fin sea reversible ya que nos aseguramos que esta libre en caminoAux
     caminoAux(Inicio, Fin, Tablero, [Inicio], Camino).
 
 % caminoAux(Actual, Fin, Tablero, Visitados, Camino)
 % caminoAux es exitoso si el Camino llega a Fin mediante celdas transitables
 caminoAux(Fin, Fin, Tablero, Visitados, Camino) :- reverse(Visitados, Camino).
 caminoAux(Actual, Fin, Tablero, Visitados, Camino):-
-    vecinoLibre(Actual, Tablero, Siguiente),
+    vecinoLibre(Actual, Tablero, Siguiente), % en alguna iteracion Siguiente va a ser Fin ->> Fin esta libre
     not(member(Siguiente, Visitados)),
     caminoAux(Siguiente, Fin, Tablero, [Siguiente|Visitados], Camino). 
 
 %% 5.1. Analizar la reversibilidad de los parámetros Fin y Camino justificando adecuadamente en cada
 %% caso por qué el predicado se comporta como lo hace
 
-% Fin es reversible, podemos dejarla sin instanciar y encuentra los caminos desde cada inicio.
+% Fin es reversible, podemos dejarla sin instanciar y encuentra los caminos desde cada inicio. 
 % Camino parece no ser reversible (por lo que probamos en la terminal), esta raro hay que chequear :p xd
 
 %% Ejercicio 6
 %% camino2(+Inicio, +Fin, +Tablero, -Camino) ídem camino/4 pero que las soluciones
 %% se instancien en orden creciente de longitud.
 
-% listaDeCaminos(Inicio,Fin,Tablero,[Caminos]
+% generarCaminosOrdenados(Inicio, Fin, Tablero, CaminosOrdenados) :-
+%     camino(Inicio, Fin, Tablero, Camino), % Camino es un camino valido
+%     member(Camino, CaminosOrdenados),     % Esta en CaminosOrdenados
+%     not(not(camino(Inicio, Fin, Tablero, CN), member(CN, CaminosOrdenados))) % No hay elementos que no sean caminos en CaminosOrdenados
+%     ordenadosPorLongitud(caminosOrdenados). % CaminosOrdenados esta ordenado por longitud
 
-caminoMasCorto(Inicio,Fin,Tablero,C1) :- camino(Inicio, Fin, Tablero, C1), length(C1, L1),
-                                            not((caminoConLong(Inicio, Fin, Tablero, C2, L2), L2<L1)).
-caminoConLong(Inicio, Fin, Tablero, C2, L2) :- camino(Inicio, Fin, Tablero, C2), length(C2, L2).
+% ordenadosPorLongitud([]).
+% ordenadosPorLongitud([C|Css]) :- 
+%     length(C, L),
+%     not((member(C2, Css), length(C2, L2), L2 < L)),
+%     ordenadosPorLongitud(Css).
 
+% % Generate & Test
+% camino2(Inicio, Fin, Tablero, Camino) :-
+%     generarCaminosOrdenados(Inicio, Fin, Tablero, [], CaminosOrdenados),
+%     member(Camino, CaminosOrdenados).
 
-camino2(Inicio, Fin, Tablero, Camino) :-
-    setof(C, caminoMasCorto(Inicio, Fin, Tablero, C), Camino)
+camino5(Inicio, Fin, Tablero, Camino):- 
+    length(Tablero, N),
+    M is N*N,
+    between(0, M, L), 
+    setof(C, caminoDeLong(Inicio, Fin, Tablero, L, C), Camino).
+
+caminoDeLong(Inicio, Fin, Tablero, L, Camino) :- camino(Inicio, Fin, Tablero, Camino), length(C, L).
 
 % CAMINO 3 FUNCIONA PERO USA FINDALL, MEDIO CHEAT POR AHI
 camino3(Inicio, Fin, Tablero, Camino) :-
     bfs([[Inicio]], Fin, Tablero, Camino).
 
-bfs([[Fin|Visitados]|_], Fin, _, Camino) :-
-    reverse([Fin|Visitados], Camino).
-
+bfs([[Fin|Visitados]|_], Fin, _, Camino) :- reverse([Fin|Visitados], Camino).
 bfs([Visitados|Cola], Fin, Tablero, Camino) :-
     Visitados = [Actual|_],
     findall([Vecino|Visitados],
@@ -163,34 +157,9 @@ bfs([Visitados|Cola], Fin, Tablero, Camino) :-
             NuevosCaminos),
     append(Cola, NuevosCaminos, NuevaCola),
     bfs(NuevaCola, Fin, Tablero, Camino).
-    
-%%%%
-camino4(Inicio, Fin, Tablero, Camino) :-
-    bfs([[Inicio]], Fin, Tablero, [], Camino).
-
-bfs([[Fin|Visitados]|_], _, _, _, Camino) :-
-    reverse([Fin|Visitados], Camino).
-
-bfs([Visitados|Cola], Fin, Tablero, VisitadosPrevios, Camino) :-
-    Visitados = [Actual|_],
-    setof([Vecino|Visitados],
-          (vecinoLibre(Actual, Tablero, Vecino),
-           \+ member(Vecino, Visitados),
-           \+ member([Vecino|Visitados], VisitadosPrevios)),
-          NuevosCaminos),
-    append(VisitadosPrevios, NuevosCaminos, NuevosVisitadosPrevios),
-    append(Cola, NuevosCaminos, NuevaCola),
-    bfs(NuevaCola, Fin, Tablero, NuevosVisitadosPrevios, Camino).
-
-bfs([Visitados|Cola], Fin, Tablero, VisitadosPrevios, Camino) :-
-    Visitados = [Actual|_],
-    Actual \= Fin,
-    bfs(Cola, Fin, Tablero, VisitadosPrevios, Camino).
-
 
 %% 6.1. Analizar la reversibilidad de los parámetros Inicio y Camino justificando adecuadamente en
 %% cada caso por qué el predicado se comporta como lo hace.
-
 
 %% Ejercicio 7
 %% caminoOptimo(+Inicio, +Fin, +Tablero, -Camino) será verdadero cuando Camino sea un
