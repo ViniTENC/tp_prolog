@@ -3,11 +3,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 tablero(ej5x5, T) :-
-tablero(5, 5, T),
-ocupar(pos(1, 1), T),
-ocupar(pos(1, 2), T).
+    tablero(5, 5, T),
+    ocupar(pos(1, 1), T),
+    ocupar(pos(1, 2), T).
+
 tablero(libre20, T) :-
-tablero(20, 20, T).
+    tablero(20, 20, T).
 
 %% Ejercicio 1
 %% tablero(+Filas,+Columnas,-Tablero) instancia una estructura de tablero en blanco
@@ -15,29 +16,54 @@ tablero(20, 20, T).
 
 tablero(0, _, []).
 tablero(_, 0, []).
-tablero(N, M, [Fila|Resto]) :-
-    N > 0,
-    M > 0,
-    N1 is N - 1,
-    crear_fila(M, Fila),
-    tablero(N1, M, Resto).
+tablero(F, C, [Fila|Resto]) :-
+    F > 0,
+    C > 0,
+    F1 is F - 1,
+    crear_fila(C, Fila),
+    tablero(F1, C, Resto).
 
 crear_fila(0, []).
 crear_fila(M, [_|Resto]) :-
     M > 0,
     M1 is M - 1,
     crear_fila(M1, Resto).
+
 %% Ejercicio 2
 %% ocupar(+Pos,?Tablero) será verdadero cuando la posición indicada esté ocupada.
-pos(F, C).
-ocupar(pos(F, C), Tablero) :-
-    nth0(F, Tablero, Fila),
-    nth0(C, Fila, ocupada).
-nth0(0, [X|_], X).
-nth0(N, [_|Xs], Y) :-
+
+% pos(F, C).
+% ocupar(pos(F, C), Tablero) :-
+%     nth0(F, Tablero, Fila),
+%     nth0(C, Fila, ocupada).
+
+% nth0(0, [X|_], X).
+% nth0(N, [_|Xs], Y) :-
+%     N > 0,
+%     N1 is N - 1,
+%     nth0(N1, Xs, Y).
+
+%alternativa
+
+iesimoElemento(0, [Elem|_], Elem).
+iesimoElemento(N, [_|Elems], Elem) :- 
     N > 0,
     N1 is N - 1,
-    nth0(N1, Xs, Y).
+    iesimoElemento(N1, Elems, Elem).
+
+indicesValidos(F, C, Tablero) :-
+    length(Tablero, N),
+    F >= 0,
+    C >= 0,
+    F < N,
+    iesimoElemento(F, Tablero, Fila),
+    length(Fila, M),
+    C < M.
+
+ocupar(pos(F,C), Tablero) :- 
+    indicesValidos(F,C,Tablero),
+    iesimoElemento(F, Tablero, Fila),
+    iesimoElemento(C, Fila, ocupada).    
 
 %% Ejercicio 3
 %% vecino(+Pos, +Tablero, -PosVecino) será verdadero cuando PosVecino sea
@@ -45,21 +71,25 @@ nth0(N, [_|Xs], Y) :-
 %% pos(F,C), donde Pos=pos(F,C). Las celdas contiguas puede ser a lo sumo cuatro
 %% dado que el robot se moverá en forma ortogonal.
 % N es el length del tablero 
+
+% derecha
 vecino(pos(F, C), Tablero, pos(F1, C)) :-
     F1 is F + 1,
     length(Tablero, N),
     F1 < N.
+% abajo
 vecino(pos(F, C), Tablero, pos(F, C1)) :-
     C1 is C + 1,
     length(Tablero, N),
     C1 < N.
+% izquierda
 vecino(pos(F, C), Tablero, pos(F1, C)) :-
     F1 is F - 1,
     F1 >= 0.
+% arriba
 vecino(pos(F, C), Tablero, pos(F, C1)) :-
     C1 is C - 1,
-    C1 >= 0
-.
+    C1 >= 0.
 
 %% Ejercicio 4
 %% vecinoLibre(+Pos, +Tablero, -PosVecino) idem vecino/3 pero además PosVecino
@@ -68,11 +98,10 @@ vecinoLibre(pos(F, C), T, pos(F1,C1)) :-
     vecino(pos(F, C), T, pos(F1, C1)),
     estaLibre(pos(F1, C1), T).
 
-
 estaLibre(pos(F, C), T) :-
-    nth0(F, T, Fila),
-    nth0(C, Fila, Celda),
-    var(Celda).
+    iesimoElemento(F, T, Fila),
+    iesimoElemento(C, Fila, Celda),
+    var(Celda). % es de la forma _
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Definicion de caminos
@@ -86,19 +115,19 @@ estaLibre(pos(F, C), T) :-
 %% Notar que la cantidad de caminos es finita y por ende se tiene que poder recorrer
 %% todas las alternativas eventualmente.
 %% Consejo: Utilizar una lista auxiliar con las posiciones visitadas
+
 camino(Inicio, Fin, Tablero, Camino) :-
-    % [Inicio] es la lista de posiciones visitadas
-    % agregar check de si Inicio/Fin estan ocupados; si lo estan, no hay camino
     estaLibre(Inicio, Tablero),
+    estaLibre(Fin, Tablero),
     caminoAux(Inicio, Fin, Tablero, [Inicio], Camino).
 
+% caminoAux(Actual, Fin, Tablero, Visitados, Camino)
+% caminoAux es exitoso si el Camino llega a Fin mediante celdas transitables
 caminoAux(Fin, Fin, Tablero, Visitados, Camino) :- reverse(Visitados, Camino).
-
 caminoAux(Actual, Fin, Tablero, Visitados, Camino):-
     vecinoLibre(Actual, Tablero, Siguiente),
     not(member(Siguiente, Visitados)),
-    caminoAux(Siguiente, Fin, Tablero, [Siguiente|Visitados], Camino).
-
+    caminoAux(Siguiente, Fin, Tablero, [Siguiente|Visitados], Camino). 
 
 %% 5.1. Analizar la reversibilidad de los parámetros Fin y Camino justificando adecuadamente en cada
 %% caso por qué el predicado se comporta como lo hace
