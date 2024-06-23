@@ -10,7 +10,8 @@ tablero(ej5x5, T) :-
 tablero(libre20, T) :-
     tablero(20, 20, T).
 
-%% Ejercicio 1
+%% Ejercicio 1 %%
+
 %% tablero(+Filas,+Columnas,-Tablero) instancia una estructura de tablero en blanco
 %% de Filas x Columnas, con todas las celdas libres.
 
@@ -23,6 +24,7 @@ tablero(F, C, [Fila|Resto]) :-
     crear_fila(C, Fila),
     tablero(F1, C, Resto).
 
+% crear_fila(+Columnas, -Fila) instancia una fila de celdas libres
 crear_fila(0, []).
 crear_fila(M, [_|Resto]) :-
     M > 0,
@@ -35,8 +37,9 @@ crear_fila(M, [_|Resto]) :-
 ocupar(pos(F,C), Tablero) :- 
     indicesValidos(F,C,Tablero),
     nth0(F, Tablero, Fila),
-    nth0(C, Fila, ocupada).    
+    nth0(C, Fila, ocupada).  
 
+% indicesValidos(+F, +C, +Tablero) es verdadero si (F,C) es válido en Tablero
 indicesValidos(F, C, Tablero) :-
     length(Tablero, N),
     F >= 0,
@@ -54,11 +57,13 @@ indicesValidos(F, C, Tablero) :-
 % N es el length del tablero 
 
 % derecha
-vecino(pos(F, C), Tablero, pos(F1, C)) :- F1 is F + 1,
+vecino(pos(F, C), Tablero, pos(F1, C)) :- 
+    F1 is F + 1,
     length(Tablero, N),
     F1 < N.
 % abajo
-vecino(pos(F, C), Tablero, pos(F, C1)) :- C1 is C + 1,
+vecino(pos(F, C), Tablero, pos(F, C1)) :- 
+    C1 is C + 1,
     length(Tablero, N),
     C1 < N.
 % izquierda
@@ -77,6 +82,7 @@ vecinoLibre(pos(F, C), T, pos(F1,C1)) :-
     vecino(pos(F, C), T, pos(F1, C1)),
     estaLibre(pos(F1, C1), T).
 
+% estaLibre(+Pos, +Tablero) es verdadero si la celda en Pos esta libre
 estaLibre(pos(F, C), T) :-
     nth0(F, T, Fila),
     nth0(C, Fila, Celda),
@@ -100,9 +106,11 @@ camino(Inicio, Fin, Tablero, Camino) :-
     % estaLibre(Fin, Tablero), esto permite que Fin sea reversible ya que nos aseguramos que esta libre en caminoAux
     caminoAux(Inicio, Fin, Tablero, [Inicio], Camino).
 
-% caminoAux(Actual, Fin, Tablero, Visitados, Camino)
+% caminoAux(+Actual, +Fin, +Tablero, +Visitados, -Camino)
 % caminoAux es exitoso si el Camino llega a Fin mediante celdas transitables
-caminoAux(Fin, Fin, Tablero, Visitados, Camino) :- reverse(Visitados, Camino).
+caminoAux(Fin, Fin, Tablero, Visitados, Camino) :-
+    reverse(Visitados, Camino).
+
 caminoAux(Actual, Fin, Tablero, Visitados, Camino):-
     vecinoLibre(Actual, Tablero, Siguiente), % en alguna iteracion Siguiente va a ser Fin ->> Fin esta libre
     not(member(Siguiente, Visitados)),
@@ -135,18 +143,18 @@ caminoAux(Actual, Fin, Tablero, Visitados, Camino):-
 %     generarCaminosOrdenados(Inicio, Fin, Tablero, [], CaminosOrdenados),
 %     member(Camino, CaminosOrdenados).
 
-camino5(Inicio, Fin, Tablero, Camino):- 
+/*camino5(Inicio, Fin, Tablero, Camino):- 
     length(Tablero, N),
     M is N*N,
     between(0, M, L), 
     setof(C, caminoDeLong(Inicio, Fin, Tablero, L, C), Camino).
 
-caminoDeLong(Inicio, Fin, Tablero, L, Camino) :- camino(Inicio, Fin, Tablero, Camino), length(C, L).
+caminoDeLong(Inicio, Fin, Tablero, L, Camino) :- camino(Inicio, Fin, Tablero, Camino), length(C, L).*/
 
-% CAMINO 3 FUNCIONA PERO USA FINDALL, MEDIO CHEAT POR AHI
-camino3(Inicio, Fin, Tablero, Camino) :-
+camino2(Inicio, Fin, Tablero, Camino) :-
     bfs([[Inicio]], Fin, Tablero, Camino).
 
+% bfs(+Cola, +Fin, +Tablero, -Camino)
 bfs([[Fin|Visitados]|_], Fin, _, Camino) :- reverse([Fin|Visitados], Camino).
 bfs([Visitados|Cola], Fin, Tablero, Camino) :-
     Visitados = [Actual|_],
@@ -162,11 +170,15 @@ bfs([Visitados|Cola], Fin, Tablero, Camino) :-
 %% Ejercicio 7
 %% caminoOptimo(+Inicio, +Fin, +Tablero, -Camino) será verdadero cuando Camino sea un
 %% camino óptimo sobre Tablero entre Inicio y Fin. Notar que puede no ser único.
-caminoOptimo(Inicio,Fin,Tablero,C1) :- camino(Inicio, Fin, Tablero, C1), length(C1, L1),
-                                            not((caminoConLong(Inicio, Fin, Tablero, C2, L2), L2<L1)).
-caminoConLong(Inicio, Fin, Tablero, C2, L2) :- camino(Inicio, Fin, Tablero, C2), length(C2, L2).
+caminoOptimo(Inicio,Fin,Tablero,C1) :- 
+    camino(Inicio, Fin, Tablero, C1), % Generate
+    length(C1, L1), % Test
+    not((caminoConLong(Inicio, Fin, Tablero, C2, L2), L2<L1)). % Test
 
-
+% caminoConLong(+Inicio, +Fin, +Tablero, -Camino, -L) es verdadero si Camino es un camino con longitud L 
+caminoConLong(Inicio, Fin, Tablero, C2, L2) :- 
+    camino(Inicio, Fin, Tablero, C2), % Generate
+    length(C2, L2). % Test
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Tableros simultáneos
@@ -183,6 +195,7 @@ caminoDual(Inicio, Fin, Tablero1, Tablero2, Camino) :-
     % chequeo de dimensiones
     caminoDual_aux(Inicio, Fin, Tablero1, Tablero2, [Inicio], Camino).
 
+% caminoDual_aux(+Actual, +Fin, +Tablero1, +Tablero2, +Visitados, -Camino)
 % llegue al final
 caminoDual_aux(Fin, Fin, _, _, Visitados, Camino) :- reverse(Visitados, Camino).
 % sigo buscando
@@ -197,14 +210,37 @@ caminoDual_aux(Actual, Fin, T1, T2, Visitados, Camino):-
 %% TESTS
 %%%%%%%%
 
-cantidadTestsTablero(2). % Actualizar con la cantidad de tests que entreguen
+cantidadTestsTablero(7). % Actualizar con la cantidad de tests que entreguen
 testTablero(1) :- tablero(0,0,[]).
+
+% ocupar
 testTablero(2) :- ocupar(pos(0,0), [[ocupada]]).
+testTablero(3) :- not(ocupar(pos(1,1), [[ocupada, _], [_, _]])).
+
+% crear_fila
+testTablero(3) :- crear_fila(3, [_,_,_]).
+testTablero(4) :- not(crear_fila(0, [_,_,_])).
+
+% ocupar
+testTablero(5) :- tablero(2,2,T), ocupar(pos(0,0), T), T = [[ocupada,_],[_,_]].
+
+% indicesValidos
+testTablero(6) :- indicesValidos(0, 0, [[_,_]]).
+testTablero(7) :- not(indicesValidos(1, 1, [[_,_]])).
+
 % Agregar más tests
 
-cantidadTestsVecino(1). % Actualizar con la cantidad de tests que entreguen
-testVecino(1) :- vecino(pos(0,0), [[_,_]], pos(0,1)).
-% Agregar más tests
+cantidadTestsVecino(8). % Actualizar con la cantidad de tests que entreguen
+% vecino
+testVecino(1) :- tablero(2,3, T), vecino(pos(0,0), T, pos(0,1)), T = [[_,_,_],[_,_,_]].
+testVecino(2) :- tablero(2,3, T), vecino(pos(0,0), T, pos(1,0)), T = [[_,_,_],[_,_,_]].
+testVecino(3) :- tablero(2,3, T), vecino(pos(0,0), T, pos(0,1)), T = [[_,_,_],[_,_,_]].
+testVecino(4) :- tablero(2,3, _), not(vecino(pos(1,1), _, pos(0,0))). 
+% vecinoLibre
+testVecino(5) :- tablero(2,3, T), vecinoLibre(pos(0,0), T, P).
+testVecino(6) :- tablero(2,3, T), ocupar(pos(1,0), T), vecinoLibre(pos(0,0), T, P).
+testVecino(7) :- tablero(2,3, T), ocupar(pos(0,1), T), ocupar(pos(1,0), T), not(vecinoLibre(pos(0,0), T, P)).
+testVecino(8) :- not((tablero(2,3, T), ocupar(pos(1,0), T), vecinoLibre(pos(0,0), T, pos(1,0)))). 
 
 cantidadTestsCamino(0). % Actualizar con la cantidad de tests que entreguen
 % Agregar más tests
