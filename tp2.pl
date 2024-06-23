@@ -242,14 +242,31 @@ testVecino(6) :- tablero(2,3, T), ocupar(pos(1,0), T), vecinoLibre(pos(0,0), T, 
 testVecino(7) :- tablero(2,3, T), ocupar(pos(0,1), T), ocupar(pos(1,0), T), not(vecinoLibre(pos(0,0), T, P)).
 testVecino(8) :- not((tablero(2,3, T), ocupar(pos(1,0), T), vecinoLibre(pos(0,0), T, pos(1,0)))). 
 
-cantidadTestsCamino(0). % Actualizar con la cantidad de tests que entreguen
-% Agregar más tests
+cantidadTestsCamino(3). % Actualizar con la cantidad de tests que entreguen
+% camino
+testCamino(1) :- tablero(2,2,T), camino(pos(0,0), pos(1,1), T, [pos(0,0), pos(0,1), pos(1,1)]).
+testCamino(2) :- tablero(2,2,T), camino(pos(0,0), pos(1,1), T, [pos(0,0), pos(1,0), pos(1,1)]).
+testCamino(3) :- tablero(2,2,T), ocupar(pos(1,0), T), ocupar(pos(0,1), T), not(camino(pos(0,0), pos(1,1), T, C)).
+% caminoAux
+% camino2
+% bfs
 
-cantidadTestsCaminoOptimo(0). % Actualizar con la cantidad de tests que entreguen
-% Agregar más tests
+cantidadTestsCaminoOptimo(6). % Actualizar con la cantidad de tests que entreguen
+% caminoOptimo
+testCaminoOptimo(1) :- tablero(3,2,T), caminoOptimo(pos(0,0), pos(1,1), T, [pos(0,0), pos(0,1), pos(1,1)]).
+testCaminoOptimo(2) :- tablero(3,2,T), caminoOptimo(pos(0,0), pos(1,1), T, [pos(0,0), pos(1,0), pos(1,1)]).
+testCaminoOptimo(3) :- tablero(3,2,T), ocupar(pos(1,0), T), not(caminoOptimo(pos(0,0), pos(1,1), T, [pos(0,0), pos(1,0), pos(1,1)])).
+testCaminoOptimo(4) :- tablero(3,2,T), ocupar(pos(1,0), T), caminoOptimo(pos(0,0), pos(1,1), T, [pos(0,0), pos(0,1), pos(1,1)]).
 
-cantidadTestsCaminoDual(0). % Actualizar con la cantidad de tests que entreguen
+% caminoConLong
+testCaminoOptimo(5) :- tablero(3,2,T), caminoConLong(pos(0,0), pos(1,1), T, [pos(0,0), pos(0,1), pos(1,1)], 3).
+testCaminoOptimo(6) :- tablero(3,2,T), not(caminoConLong(pos(0,0), pos(1,1), T, [pos(0,0), pos(1,0), pos(1,1)], 4)).
+
+cantidadTestsCaminoDual(3). % Actualizar con la cantidad de tests que entreguen
 % Agregar más tests
+testCaminoDual(1) :- tablero(3,2,T1), tablero(3,2,T2), caminoDual(pos(0,0), pos(1,1), T1, T2, [pos(0,0), pos(0,1), pos(1,1)]). % Camino correcto
+testCaminoDual(2) :- tablero(3,2,T1), tablero(3,2,T2), ocupar(pos(1,0), T1), ocupar(pos(0,1), T2), not(caminoDual(pos(0,0), pos(1,1), T1, T2, C)). % Distintos caminos
+testCaminoDual(3) :- tablero(3,2,T1), tablero(3,2,T2), ocupar(pos(1,0), T2), ocupar(pos(0,1), T2), not(caminoDual(pos(0,0), pos(1,1), T1, T2, C)). % T2 no tiene camino
 
 tests(tablero) :- cantidadTestsTablero(M), forall(between(1,M,N), testTablero(N)).
 tests(vecino) :- cantidadTestsVecino(M), forall(between(1,M,N), testVecino(N)).
