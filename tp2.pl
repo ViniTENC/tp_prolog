@@ -247,9 +247,35 @@ cantidadTestsCamino(3). % Actualizar con la cantidad de tests que entreguen
 testCamino(1) :- tablero(2,2,T), camino(pos(0,0), pos(1,1), T, [pos(0,0), pos(0,1), pos(1,1)]).
 testCamino(2) :- tablero(2,2,T), camino(pos(0,0), pos(1,1), T, [pos(0,0), pos(1,0), pos(1,1)]).
 testCamino(3) :- tablero(2,2,T), ocupar(pos(1,0), T), ocupar(pos(0,1), T), not(camino(pos(0,0), pos(1,1), T, C)).
+
+cantidadTestsCaminoAux(5). % Actualizar con la cantidad de tests que entreguen
+
 % caminoAux
-% camino2
+testCaminoAux(1) :- tablero(2, 2, T), caminoAux(pos(0, 0), pos(1, 1), T, [pos(0, 0)], [pos(0, 0), pos(0, 1), pos(1, 1)]).
+testCaminoAux(2) :- tablero(2, 2, T), caminoAux(pos(0, 0), pos(1, 1), T, [pos(0, 0)], [pos(0, 0), pos(1, 0), pos(1, 1)]).
+testCaminoAux(3) :- tablero(2, 2, T), ocupar(pos(1, 0), T), ocupar(pos(0, 1), T), not(caminoAux(pos(0, 0), pos(1, 1), T, [pos(0, 0)], C)).
+testCaminoAux(4) :- tablero(3, 3, T), ocupar(pos(1, 1), T), caminoAux(pos(0, 0), pos(2, 2), T, [pos(0, 0)], [pos(0, 0), pos(0, 1), pos(0, 2), pos(1, 2), pos(2, 2)]).
+testCaminoAux(5) :- tablero(3, 3, T), ocupar(pos(1, 1), T), not(caminoAux(pos(0, 0), pos(2, 2), T, [pos(0, 0)], [pos(0, 0), pos(1, 0), pos(1, 1), pos(2, 2)])).
+
+tests(caminoAux) :- cantidadTestsCaminoAux(M), forall(between(1, M, N), testCaminoAux(N)).
+
+
+
+
+cantidadTestsBFS(4). % Actualizar con la cantidad de tests que entreguen
 % bfs
+testBFS(1) :- tablero(3,3,T), bfs([[pos(0,0)]], pos(2,2), T, [pos(0,0), pos(0,1), pos(0,2), pos(1,2), pos(2,2)]).
+testBFS(2) :- tablero(3,3,T), ocupar(pos(1,1), T), bfs([[pos(0,0)]], pos(2,2), T, [pos(0,0), pos(0,1), pos(0,2), pos(1,2), pos(2,2)]).
+testBFS(3) :- tablero(3,3,T), bfs([[pos(0,0)]], pos(0,0), T, [pos(0,0)]).
+testBFS(4) :- tablero(3,3,T), ocupar(pos(1,1), T), ocupar(pos(0,1), T), ocupar(pos(1,0), T), not(bfs([[pos(0,0)]], pos(2,2), T, _)).
+
+cantidadTestsCamino2(2). % Actualizar con la cantidad de tests que entreguen
+% camino2
+testCamino2(1) :- tablero(3,3,T), camino2(pos(0,0), pos(2,2), T, [pos(0,0), pos(0,1), pos(0,2), pos(1,2), pos(2,2)]).
+testCamino2(2) :- tablero(3,3,T), ocupar(pos(1,1), T), camino2(pos(0,0), pos(2,2), T, [pos(0,0), pos(0,1), pos(0,2), pos(1,2), pos(2,2)]).
+
+
+
 
 cantidadTestsCaminoOptimo(6). % Actualizar con la cantidad de tests que entreguen
 % caminoOptimo
@@ -268,6 +294,19 @@ testCaminoDual(1) :- tablero(3,2,T1), tablero(3,2,T2), caminoDual(pos(0,0), pos(
 testCaminoDual(2) :- tablero(3,2,T1), tablero(3,2,T2), ocupar(pos(1,0), T1), ocupar(pos(0,1), T2), not(caminoDual(pos(0,0), pos(1,1), T1, T2, C)). % Distintos caminos
 testCaminoDual(3) :- tablero(3,2,T1), tablero(3,2,T2), ocupar(pos(1,0), T2), ocupar(pos(0,1), T2), not(caminoDual(pos(0,0), pos(1,1), T1, T2, C)). % T2 no tiene camino
 
+
+cantidadTestsCaminoDualAux(4). % Actualizar con la cantidad de tests que entreguen
+% caminoDual_aux
+testCaminoDualAux(1) :- tablero(3,3,T1), tablero(3,3,T2), caminoDual_aux(pos(0,0), pos(2,2), T1, T2, [pos(0,0)], [pos(0,0), pos(0,1), pos(0,2), pos(1,2), pos(2,2)]).
+testCaminoDualAux(2) :- tablero(3,3,T1), tablero(3,3,T2), ocupar(pos(1,1), T1), ocupar(pos(1,1), T2), caminoDual_aux(pos(0,0), pos(2,2), T1, T2, [pos(0,0)], [pos(0,0), pos(0,1), pos(0,2), pos(1,2), pos(2,2)]).
+testCaminoDualAux(3) :- tablero(3,3,T1), tablero(3,3,T2), caminoDual_aux(pos(0,0), pos(0,0), T1, T2, [pos(0,0)], [pos(0,0)]).
+testCaminoDualAux(4) :- tablero(3,3,T1), tablero(3,3,T2), ocupar(pos(1,1), T1), ocupar(pos(0,1), T2), ocupar(pos(1,0), T2), not(caminoDual_aux(pos(0,0), pos(2,2), T1, T2, [pos(0,0)], _)).
+
+
+
+tests(bfs) :- cantidadTestsBFS(M), forall(between(1,M,N), testBFS(N)).
+tests(camino2) :- cantidadTestsCamino2(M), forall(between(1,M,N), testCamino2(N)).
+tests(caminoDualAux) :- cantidadTestsCaminoDualAux(M), forall(between(1,M,N), testCaminoDualAux(N)).
 tests(tablero) :- cantidadTestsTablero(M), forall(between(1,M,N), testTablero(N)).
 tests(vecino) :- cantidadTestsVecino(M), forall(between(1,M,N), testVecino(N)).
 tests(camino) :- cantidadTestsCamino(M), forall(between(1,M,N), testCamino(N)).
@@ -279,6 +318,11 @@ tests(todos) :-
   tests(vecino),
   tests(camino),
   tests(caminoOptimo),
-  tests(caminoDual).
+  tests(caminoDual),
+  tests(caminoDualAux),
+  tests(bfs),
+  tests(camino2),
+  tests(caminoAux).
+
 
 tests :- tests(todos).
