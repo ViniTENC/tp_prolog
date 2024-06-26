@@ -119,37 +119,15 @@ caminoAux(Actual, Fin, Tablero, Visitados, Camino):-
 %% 5.1. Analizar la reversibilidad de los parámetros Fin y Camino justificando adecuadamente en cada
 %% caso por qué el predicado se comporta como lo hace
 
-% Fin es reversible, podemos dejarla sin instanciar y encuentra los caminos desde cada inicio. 
-% Camino parece no ser reversible (por lo que probamos en la terminal), esta raro hay que chequear :p xd
+% Fin es reversible. Esto se debe a la manera en que caminoAux/5 explora el tablero, verificando celdas libres y continua exploarndo hasta llegar a 'Fin'
+% Si agregasemos la restriccion de que Fin debe estar libre (en camino/4), Fin no seria reversible, pues estaLibre/2 no permite que el primer parametro no este instanciado.
+
+% Camino no es reversible por como esta armado caminoAux/5. Se deberia agregar un predicado que verifique que el camino dado es valido (que no use posiciones ocupadas y que no tenga ciclos)
+% Camino se construye y luego se devuelve, el predicado no verifica su correctitud.
 
 %% Ejercicio 6
 %% camino2(+Inicio, +Fin, +Tablero, -Camino) ídem camino/4 pero que las soluciones
 %% se instancien en orden creciente de longitud.
-
-% generarCaminosOrdenados(Inicio, Fin, Tablero, CaminosOrdenados) :-
-%     camino(Inicio, Fin, Tablero, Camino), % Camino es un camino valido
-%     member(Camino, CaminosOrdenados),     % Esta en CaminosOrdenados
-%     not(not(camino(Inicio, Fin, Tablero, CN), member(CN, CaminosOrdenados))) % No hay elementos que no sean caminos en CaminosOrdenados
-%     ordenadosPorLongitud(caminosOrdenados). % CaminosOrdenados esta ordenado por longitud
-
-% ordenadosPorLongitud([]).
-% ordenadosPorLongitud([C|Css]) :- 
-%     length(C, L),
-%     not((member(C2, Css), length(C2, L2), L2 < L)),
-%     ordenadosPorLongitud(Css).
-
-% % Generate & Test
-% camino2(Inicio, Fin, Tablero, Camino) :-
-%     generarCaminosOrdenados(Inicio, Fin, Tablero, [], CaminosOrdenados),
-%     member(Camino, CaminosOrdenados).
-
-/*camino5(Inicio, Fin, Tablero, Camino):- 
-    length(Tablero, N),
-    M is N*N,
-    between(0, M, L), 
-    setof(C, caminoDeLong(Inicio, Fin, Tablero, L, C), Camino).
-
-caminoDeLong(Inicio, Fin, Tablero, L, Camino) :- camino(Inicio, Fin, Tablero, Camino), length(C, L).*/
 
 camino2(Inicio, Fin, Tablero, Camino) :-
     bfs([[Inicio]], Fin, Tablero, Camino).
