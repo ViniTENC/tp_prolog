@@ -133,6 +133,7 @@ camino2(Inicio, Fin, Tablero, Camino) :-
     bfs([[Inicio]], Fin, Tablero, Camino).
 
 % bfs(+Cola, +Fin, +Tablero, -Camino)
+% tablero(3,3, T), bfs([[pos(2,1)]], pos(2,1), T, C)
 bfs([[Fin|Visitados]|_], Fin, _, Camino) :- reverse([Fin|Visitados], Camino).
 bfs([Visitados|Cola], Fin, Tablero, Camino) :-
     Visitados = [Actual|_],
@@ -188,27 +189,24 @@ caminoDual_aux(Actual, Fin, T1, T2, Visitados, Camino):-
 %% TESTS
 %%%%%%%%
 
-cantidadTestsTablero(7). % Actualizar con la cantidad de tests que entreguen
+cantidadTestsTablero(8). 
 testTablero(1) :- tablero(0,0,[]).
 
-% ocupar
-testTablero(2) :- ocupar(pos(0,0), [[ocupada]]).
-testTablero(3) :- not(ocupar(pos(1,1), [[ocupada, _], [_, _]])).
-
 % crear_fila
-testTablero(3) :- crear_fila(3, [_,_,_]).
-testTablero(4) :- not(crear_fila(0, [_,_,_])).
+testTablero(2) :- crear_fila(3, [_,_,_]).
+testTablero(3) :- not(crear_fila(0, [_,_,_])).
 
 % ocupar
-testTablero(5) :- tablero(2,2,T), ocupar(pos(0,0), T), T = [[ocupada,_],[_,_]].
+testTablero(4) :- ocupar(pos(0,0), [[ocupada]]).
+testTablero(5) :- not(ocupar(pos(2,1),[[_,_],[_,_]])).
+testTablero(6) :- tablero(2,2,T), ocupar(pos(0,0), T), T = [[ocupada,_],[_,_]].
 
 % indicesValidos
-testTablero(6) :- indicesValidos(0, 0, [[_,_]]).
-testTablero(7) :- not(indicesValidos(1, 1, [[_,_]])).
+testTablero(7) :- indicesValidos(0, 0, [[_,_]]).
+testTablero(8) :- not(indicesValidos(1, 1, [[_,_]])).
 
-% Agregar más tests
 
-cantidadTestsVecino(8). % Actualizar con la cantidad de tests que entreguen
+cantidadTestsVecino(8).
 % vecino
 testVecino(1) :- tablero(2,3, T), vecino(pos(0,0), T, pos(0,1)), T = [[_,_,_],[_,_,_]].
 testVecino(2) :- tablero(2,3, T), vecino(pos(0,0), T, pos(1,0)), T = [[_,_,_],[_,_,_]].
@@ -220,7 +218,7 @@ testVecino(6) :- tablero(2,3, T), ocupar(pos(1,0), T), vecinoLibre(pos(0,0), T, 
 testVecino(7) :- tablero(2,3, T), ocupar(pos(0,1), T), ocupar(pos(1,0), T), not(vecinoLibre(pos(0,0), T, P)).
 testVecino(8) :- not((tablero(2,3, T), ocupar(pos(1,0), T), vecinoLibre(pos(0,0), T, pos(1,0)))). 
 
-cantidadTestsCamino(3). % Actualizar con la cantidad de tests que entreguen
+cantidadTestsCamino(3).
 % camino
 testCamino(1) :- tablero(2,2,T), camino(pos(0,0), pos(1,1), T, [pos(0,0), pos(0,1), pos(1,1)]).
 testCamino(2) :- tablero(2,2,T), camino(pos(0,0), pos(1,1), T, [pos(0,0), pos(1,0), pos(1,1)]).
