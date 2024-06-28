@@ -1,3 +1,8 @@
+% Pedro Fuentes Urfeig 1088/22
+% Juan Manuel Zimmerman 123/23
+% Sebastian Andres 1088/22
+% Vicente Tenconi 1171/22
+
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Tablero
 %%%%%%%%%%%%%%%%%%%%%%%%
