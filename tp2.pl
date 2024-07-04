@@ -134,19 +134,28 @@ caminoAux(Actual, Fin, Tablero, Visitados, Camino):-
 %% camino2(+Inicio, +Fin, +Tablero, -Camino) ídem camino/4 pero que las soluciones
 %% se instancien en orden creciente de longitud.
 
-camino2(Inicio, Fin, Tablero, Camino) :-
-    bfs([[Inicio]], Fin, Tablero, Camino).
+% camino2(Inicio, Fin, Tablero, Camino) :-
+%     bfs([[Inicio]], Fin, Tablero, Camino).
 
-% bfs(+Cola, +Fin, +Tablero, -Camino)
-% tablero(3,3, T), bfs([[pos(2,1)]], pos(2,1), T, C)
-bfs([[Fin|Visitados]|_], Fin, _, Camino) :- reverse([Fin|Visitados], Camino).
-bfs([Visitados|Cola], Fin, Tablero, Camino) :-
-    Visitados = [Actual|_],
-    findall([Vecino|Visitados],
-            (vecinoLibre(Actual, Tablero, Vecino), \+ member(Vecino, Visitados)),
-            NuevosCaminos),
-    append(Cola, NuevosCaminos, NuevaCola),
-    bfs(NuevaCola, Fin, Tablero, Camino).
+% % bfs(+Cola, +Fin, +Tablero, -Camino)
+% % tablero(3,3, T), bfs([[pos(2,1)]], pos(2,1), T, C)
+% bfs([[Fin|Visitados]|_], Fin, _, Camino) :- reverse([Fin|Visitados], Camino).
+% bfs([Visitados|Cola], Fin, Tablero, Camino) :-
+%     Visitados = [Actual|_],
+%     findall([Vecino|Visitados],
+%             (vecinoLibre(Actual, Tablero, Vecino), \+ member(Vecino, Visitados)),
+%             NuevosCaminos),
+%     append(Cola, NuevosCaminos, NuevaCola),
+%     bfs(NuevaCola, Fin, Tablero, Camino).
+
+
+%% VERSION APTA
+camino2(Inicio, Fin, Tablero, Camino) :- cantVertices(Tablero, N), between(0,N,K), caminoConLong(Inicio, Fin, Tablero, Camino, K).
+
+% un tablero es de nxm 
+cantVertices([F|T], R) :- length([F|T], N), length(F, M), R is N*M.
+
+
 
 %% 6.1. Analizar la reversibilidad de los parámetros Inicio y Camino justificando adecuadamente en
 %% cada caso por qué el predicado se comporta como lo hace.
