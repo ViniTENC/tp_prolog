@@ -87,6 +87,7 @@ vecinoLibre(pos(F, C), T, pos(F1,C1)) :-
     vecino(pos(F, C), T, pos(F1, C1)),
     estaLibre(pos(F1, C1), T).
 
+% Pos es reversible!
 % estaLibre(+Pos, +Tablero) es verdadero si la celda en Pos esta libre
 estaLibre(pos(F, C), T) :-
     nth0(F, T, Fila),
@@ -108,7 +109,7 @@ estaLibre(pos(F, C), T) :-
 
 camino(Inicio, Fin, Tablero, Camino) :-
     estaLibre(Inicio, Tablero),
-    % estaLibre(Fin, Tablero), esto permite que Fin sea reversible ya que nos aseguramos que esta libre en caminoAux
+    estaLibre(Fin, Tablero), 
     caminoAux(Inicio, Fin, Tablero, [Inicio], Camino).
 
 % caminoAux(+Actual, +Fin, +Tablero, +Visitados, -Camino)
@@ -160,9 +161,8 @@ cantVertices([F|T], R) :- length([F|T], N), length(F, M), R is N*M.
 %% 6.1. Analizar la reversibilidad de los parámetros Inicio y Camino justificando adecuadamente en
 %% cada caso por qué el predicado se comporta como lo hace.
 
-% Vemos que Inicio no es reversible en camino2/4. Esto se debe a que el predicado bfs/4 utiliza vecinoLibre, que usa vecino.
-% vecino necesita que la posicion actual sea instanciada, por lo que Inicio debe estar instanciado. 
-% Entonces, Inicio no es reversible en camino2/4
+% Vemos que Inicio es reversible en camino2/4. Esto se debe a que es reversible en caminoConLong, que utiliza camino/4, y Iniciop
+% es reversible en este predicado.
 
 % Vemos que Camino es reversible en camino2/4. Esto se debe a que actua como un verificador de si el camino es valido.
 % Si el camino es valido, la funcion tiene exito al generar un camino valido por bfs/4.
