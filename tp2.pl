@@ -135,39 +135,22 @@ caminoAux(Actual, Fin, Tablero, Visitados, Camino):-
 %% camino2(+Inicio, +Fin, +Tablero, -Camino) ídem camino/4 pero que las soluciones
 %% se instancien en orden creciente de longitud.
 
-% camino2(Inicio, Fin, Tablero, Camino) :-
-%     bfs([[Inicio]], Fin, Tablero, Camino).
+camino2(Inicio, Fin, Tablero, Camino) :- 
+    cantVertices(Tablero, N), 
+    between(0,N,K), 
+    caminoConLong(Inicio, Fin, Tablero, Camino, K).
 
-% % bfs(+Cola, +Fin, +Tablero, -Camino)
-% % tablero(3,3, T), bfs([[pos(2,1)]], pos(2,1), T, C)
-% bfs([[Fin|Visitados]|_], Fin, _, Camino) :- reverse([Fin|Visitados], Camino).
-% bfs([Visitados|Cola], Fin, Tablero, Camino) :-
-%     Visitados = [Actual|_],
-%     findall([Vecino|Visitados],
-%             (vecinoLibre(Actual, Tablero, Vecino), \+ member(Vecino, Visitados)),
-%             NuevosCaminos),
-%     append(Cola, NuevosCaminos, NuevaCola),
-%     bfs(NuevaCola, Fin, Tablero, Camino).
-
-
-%% VERSION APTA
-camino2(Inicio, Fin, Tablero, Camino) :- cantVertices(Tablero, N), between(0,N,K), caminoConLong(Inicio, Fin, Tablero, Camino, K).
-
-% un tablero es de nxm 
 cantVertices([F|T], R) :- length([F|T], N), length(F, M), R is N*M.
-
 
 
 %% 6.1. Analizar la reversibilidad de los parámetros Inicio y Camino justificando adecuadamente en
 %% cada caso por qué el predicado se comporta como lo hace.
 
-% Vemos que Inicio es reversible en camino2/4. Esto se debe a que es reversible en caminoConLong, que utiliza camino/4, y Iniciop
-% es reversible en este predicado.
+% Vemos que Inicio es reversible en camino2/4. Esto se debe a que es reversible en caminoConLong, que utiliza camino/4, y Inicio
+% es reversible en este predicado, porque si no viene instanciado es generado por estaLibre/2. Luego, es necesario que este instanciado para caminoAux/5.
 
-% Vemos que Camino es reversible en camino2/4. Esto se debe a que actua como un verificador de si el camino es valido.
-% Si el camino es valido, la funcion tiene exito al generar un camino valido por bfs/4.
-% Si el camino no es valido, la funcion devuelve false, al comparar con todos los caminos validos y no encontrar uno que sea igual.
-
+% Vemos que Camino tambien es reversible en este predicado (si Inicio y Fin estan instanciados).
+% Si camino ya viene instanciado, se van a generar las longitudes hasta dar con la que es
 
 
 %% Ejercicio 7
