@@ -140,6 +140,8 @@ camino2(Inicio, Fin, Tablero, Camino) :-
     between(0,N,K), 
     caminoConLong(Inicio, Fin, Tablero, Camino, K).
 
+% usamos la cantidad de vertices como una cota superior de la long maxima de un camino simple.
+% esto es porque no puede pasar dos veces por el mismo vertice
 cantVertices([F|T], R) :- length([F|T], N), length(F, M), R is N*M.
 
 
@@ -177,8 +179,8 @@ caminoConLong(Inicio, Fin, Tablero, C2, L2) :-
 %% caminoDual(+Inicio, +Fin, +Tablero1, +Tablero2, -Camino) 
 %% Camino es un camino desde Inicio hasta Fin pasando sólo por celdas transitables en ambos tableros.
 
+% no hace falta chequear dimensiones, de eso se encarga el chequeo de condiciones del camino.
 caminoDual(Inicio, Fin, Tablero1, Tablero2, Camino) :-
-    % chequeo de dimensiones
     caminoDual_aux(Inicio, Fin, Tablero1, Tablero2, [Inicio], Camino).
 
 % caminoDual_aux(+Actual, +Fin, +Tablero1, +Tablero2, +Visitados, -Camino)
@@ -186,8 +188,8 @@ caminoDual(Inicio, Fin, Tablero1, Tablero2, Camino) :-
 caminoDual_aux(Fin, Fin, _, _, Visitados, Camino) :- reverse(Visitados, Camino).
 % sigo buscando
 caminoDual_aux(Actual, Fin, T1, T2, Visitados, Camino):-
-    vecinoLibre(Actual, T1, Siguiente), % en alguna iteracion Siguiente va a ser Fin ->> Fin esta libre
-    estaLibre(Siguiente, T2),
+    vecinoLibre(Actual, T1, Siguiente), % instancio un siguiente valido en t1 
+    estaLibre(Siguiente, T2),           % chequeo que sea valido en t2 tambien
     not(member(Siguiente, Visitados)),
     caminoDual_aux(Siguiente, Fin, T1, T2, [Siguiente|Visitados], Camino).
 
@@ -244,6 +246,11 @@ cantidadTestsCamino2(2).
 % camino2
 testCamino2(1) :- tablero(3,3,T), camino2(pos(0,0), pos(2,2), T, [pos(0,0), pos(0,1), pos(0,2), pos(1,2), pos(2,2)]).
 testCamino2(2) :- tablero(3,3,T), ocupar(pos(1,1), T), camino2(pos(0,0), pos(2,2), T, [pos(0,0), pos(0,1), pos(0,2), pos(1,2), pos(2,2)]).
+
+cantidadTestsCantVertices(2).
+% cantVertices
+testCantVertices(1) :- tablero(2,2,T), cantVertices(T, 4).
+testCantVertices(2) :- tablero(ej5x5, T), cantVertices(T, 25).
 
 cantidadTestsCaminoOptimo(6).
 % caminoOptimo
