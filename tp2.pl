@@ -128,12 +128,11 @@ caminoAux(Actual, Fin, Tablero, Visitados, Camino):-
 % Fin es reversible. Esto se debe a la manera en que caminoAux/5 explora el tablero, verificando celdas libres y continua exploarndo hasta llegar a 'Fin'
 % Si agregasemos la restriccion de que Fin debe estar libre (en camino/4), Fin no seria reversible, pues estaLibre/2 no permite que el primer parametro no este instanciado.
 
-% Camino no es reversible por como esta armado caminoAux/5. Se deberia agregar un predicado que verifique que el camino dado es valido (que no use posiciones ocupadas y que no tenga ciclos)
-% Camino se construye y luego se devuelve, el predicado no verifica su correctitud.
+% Camino es reversible en este predicado. Vemos que va a construir un camino posible y luego chequeara si la lista de visitados con reverse es igual al camino
+% Si el camino es correcto, en algun momento caminoAux va a generar la lista de visitados que le corresponde a ese camino.
 
 %% Ejercicio 6
-%% camino2(+Inicio, +Fin, +Tablero, -Camino) ídem camino/4 pero que las soluciones
-%% se instancien en orden creciente de longitud.
+%% camino2(+Inicio, +Fin, +Tablero, -Camino) ídem camino/4 pero que las soluciones se instancien en orden creciente de longitud.
 
 camino2(Inicio, Fin, Tablero, Camino) :- 
     cantVertices(Tablero, N), 
@@ -152,7 +151,9 @@ cantVertices([F|T], R) :- length([F|T], N), length(F, M), R is N*M.
 % es reversible en este predicado, porque si no viene instanciado es generado por estaLibre/2. Luego, es necesario que este instanciado para caminoAux/5.
 
 % Vemos que Camino tambien es reversible en este predicado (si Inicio y Fin estan instanciados).
-% Si camino ya viene instanciado, se van a generar las longitudes hasta dar con la que es
+% Si camino ya viene instanciado, se van a generar las longitudes hasta dar con la que es la del camino que vino instanciado
+% es decir, que en caminoConLong se va a chequear, primero que ese sea un camino, y luego que sea de esa longitud
+% vemos que si a camino le pasamos un camino correcto ya instanciado, va a devolver true.
 
 
 %% Ejercicio 7
@@ -176,23 +177,12 @@ caminoConLong(Inicio, Fin, Tablero, C2, L2) :-
 %% caminoDual(+Inicio, +Fin, +Tablero1, +Tablero2, -Camino) será verdadero
 %% cuando Camino sea un camino desde Inicio hasta Fin pasando al mismo tiempo
 %% sólo por celdas transitables de ambos tableros.
-%% caminoDual(+Inicio, +Fin, +Tablero1, +Tablero2, -Camino) 
 %% Camino es un camino desde Inicio hasta Fin pasando sólo por celdas transitables en ambos tableros.
 
-% no hace falta chequear dimensiones, de eso se encarga el chequeo de condiciones del camino.
-caminoDual(Inicio, Fin, Tablero1, Tablero2, Camino) :-
-    caminoDual_aux(Inicio, Fin, Tablero1, Tablero2, [Inicio], Camino).
-
-% caminoDual_aux(+Actual, +Fin, +Tablero1, +Tablero2, +Visitados, -Camino)
-% llegue al final
-caminoDual_aux(Fin, Fin, _, _, Visitados, Camino) :- reverse(Visitados, Camino).
-% sigo buscando
-caminoDual_aux(Actual, Fin, T1, T2, Visitados, Camino):-
-    vecinoLibre(Actual, T1, Siguiente), % instancio un siguiente valido en t1 
-    estaLibre(Siguiente, T2),           % chequeo que sea valido en t2 tambien
-    not(member(Siguiente, Visitados)),
-    caminoDual_aux(Siguiente, Fin, T1, T2, [Siguiente|Visitados], Camino).
-
+% es un camino dual si es un camino valido en T1, y ademas es camino valido en T2.
+caminoDual(Inicio, Fin, T1, T2, Camino) :-
+    camino(Inicio, Fin, T1, Camino),
+    camino(Inicio, Fin, T2, Camino).
 
 %%%%%%%%
 %% TESTS
@@ -268,19 +258,12 @@ testCaminoDual(1) :- tablero(3,2,T1), tablero(3,2,T2), caminoDual(pos(0,0), pos(
 testCaminoDual(2) :- tablero(3,2,T1), tablero(3,2,T2), ocupar(pos(1,0), T1), ocupar(pos(0,1), T2), not(caminoDual(pos(0,0), pos(1,1), T1, T2, _)). % Distintos caminos
 testCaminoDual(3) :- tablero(3,2,T1), tablero(3,2,T2), ocupar(pos(1,0), T2), ocupar(pos(0,1), T2), not(caminoDual(pos(0,0), pos(1,1), T1, T2, _)). % T2 no tiene camino
 
-
-cantidadTestsCaminoDualAux(4).
-testCaminoDualAux(1) :- tablero(3,3,T1), tablero(3,3,T2), caminoDual_aux(pos(0,0), pos(2,2), T1, T2, [pos(0,0)], [pos(0,0), pos(0,1), pos(0,2), pos(1,2), pos(2,2)]).
-testCaminoDualAux(2) :- tablero(3,3,T1), tablero(3,3,T2), ocupar(pos(1,1), T1), ocupar(pos(1,1), T2), caminoDual_aux(pos(0,0), pos(2,2), T1, T2, [pos(0,0)], [pos(0,0), pos(0,1), pos(0,2), pos(1,2), pos(2,2)]).
-testCaminoDualAux(3) :- tablero(3,3,T1), tablero(3,3,T2), caminoDual_aux(pos(0,0), pos(0,0), T1, T2, [pos(0,0)], [pos(0,0)]).
-testCaminoDualAux(4) :- tablero(3,3,T1), tablero(3,3,T2), ocupar(pos(1,1), T1), ocupar(pos(0,1), T2), ocupar(pos(1,0), T2), not(caminoDual_aux(pos(0,0), pos(2,2), T1, T2, [pos(0,0)], _)).
-
 tests(camino2) :- cantidadTestsCamino2(M), forall(between(1,M,N), testCamino2(N)).
 tests(caminoAux) :- cantidadTestsCaminoAux(M), forall(between(1, M, N), testCaminoAux(N)).
-tests(caminoDualAux) :- cantidadTestsCaminoDualAux(M), forall(between(1,M,N), testCaminoDualAux(N)).
 tests(tablero) :- cantidadTestsTablero(M), forall(between(1,M,N), testTablero(N)).
 tests(vecino) :- cantidadTestsVecino(M), forall(between(1,M,N), testVecino(N)).
 tests(camino) :- cantidadTestsCamino(M), forall(between(1,M,N), testCamino(N)).
+tests(cantVertices) :- cantidadTestsCantVertices(M), forall(between(1,M,N), testCantVertices(N)).
 tests(caminoOptimo) :- cantidadTestsCaminoOptimo(M), forall(between(1,M,N), testCaminoOptimo(N)).
 tests(caminoDual) :- cantidadTestsCaminoDual(M), forall(between(1,M,N), testCaminoDual(N)).
 
@@ -290,8 +273,8 @@ tests(todos) :-
   tests(camino),
   tests(caminoOptimo),
   tests(caminoDual),
-  tests(caminoDualAux),
   tests(camino2),
+  tests(cantVertices),
   tests(caminoAux).
 
 
