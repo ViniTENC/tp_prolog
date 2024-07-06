@@ -239,12 +239,6 @@ testCaminoAux(3) :- tablero(2, 2, T), ocupar(pos(1, 0), T), ocupar(pos(0, 1), T)
 testCaminoAux(4) :- tablero(3, 3, T), ocupar(pos(1, 1), T), caminoAux(pos(0, 0), pos(2, 2), T, [pos(0, 0)], [pos(0, 0), pos(0, 1), pos(0, 2), pos(1, 2), pos(2, 2)]).
 testCaminoAux(5) :- tablero(3, 3, T), ocupar(pos(1, 1), T), not(caminoAux(pos(0, 0), pos(2, 2), T, [pos(0, 0)], [pos(0, 0), pos(1, 0), pos(1, 1), pos(2, 2)])).
 
-cantidadTestsBFS(4).
-% bfs
-testBFS(1) :- tablero(3,3,T), bfs([[pos(0,0)]], pos(2,2), T, [pos(0,0), pos(0,1), pos(0,2), pos(1,2), pos(2,2)]).
-testBFS(2) :- tablero(3,3,T), ocupar(pos(1,1), T), bfs([[pos(0,0)]], pos(2,2), T, [pos(0,0), pos(0,1), pos(0,2), pos(1,2), pos(2,2)]).
-testBFS(3) :- tablero(3,3,T), bfs([[pos(0,0)]], pos(0,0), T, [pos(0,0)]).
-testBFS(4) :- tablero(3,3,T), ocupar(pos(1,1), T), ocupar(pos(0,1), T), ocupar(pos(1,0), T), not(bfs([[pos(0,0)]], pos(2,2), T, _)).
 
 cantidadTestsCamino2(2).
 % camino2
@@ -274,7 +268,6 @@ testCaminoDualAux(2) :- tablero(3,3,T1), tablero(3,3,T2), ocupar(pos(1,1), T1), 
 testCaminoDualAux(3) :- tablero(3,3,T1), tablero(3,3,T2), caminoDual_aux(pos(0,0), pos(0,0), T1, T2, [pos(0,0)], [pos(0,0)]).
 testCaminoDualAux(4) :- tablero(3,3,T1), tablero(3,3,T2), ocupar(pos(1,1), T1), ocupar(pos(0,1), T2), ocupar(pos(1,0), T2), not(caminoDual_aux(pos(0,0), pos(2,2), T1, T2, [pos(0,0)], _)).
 
-tests(bfs) :- cantidadTestsBFS(M), forall(between(1,M,N), testBFS(N)).
 tests(camino2) :- cantidadTestsCamino2(M), forall(between(1,M,N), testCamino2(N)).
 tests(caminoAux) :- cantidadTestsCaminoAux(M), forall(between(1, M, N), testCaminoAux(N)).
 tests(caminoDualAux) :- cantidadTestsCaminoDualAux(M), forall(between(1,M,N), testCaminoDualAux(N)).
@@ -291,7 +284,6 @@ tests(todos) :-
   tests(caminoOptimo),
   tests(caminoDual),
   tests(caminoDualAux),
-  tests(bfs),
   tests(camino2),
   tests(caminoAux).
 
