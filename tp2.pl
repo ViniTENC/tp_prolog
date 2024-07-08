@@ -125,10 +125,10 @@ caminoAux(Actual, Fin, Tablero, Visitados, Camino):-
 %% 5.1. Analizar la reversibilidad de los parámetros Fin y Camino justificando adecuadamente en cada
 %% caso por qué el predicado se comporta como lo hace
 
-% Fin es reversible. Esto se debe a la manera en que caminoAux/5 explora el tablero, verificando celdas libres y continua exploarndo hasta llegar a 'Fin'
-% Si agregasemos la restriccion de que Fin debe estar libre (en camino/4), Fin no seria reversible, pues estaLibre/2 no permite que el primer parametro no este instanciado.
+% Fin es reversible, es decir, puede estar instanciado o no. Si no esta instanciado, es generado por estaLibre. Si no, estaLibre actua como verificador.
+% Luego, es usado en caminoAux, pero para este momento ya esta instanciado, y así funciona correctamente, generando un 'Siguiente' hasta este sea unificable con 'Fin', en la primera linea de caminoAux.
 
-% Camino es reversible en este predicado. Vemos que va a construir un camino posible y luego chequeara si la lista de visitados con reverse es igual al camino
+% Camino es reversible en este predicado. Vemos que caminoAux/5 va a construir un camino posible y luego chequeara si la lista de visitados con reverse es igual al camino
 % Si el camino es correcto, en algun momento caminoAux va a generar la lista de visitados que le corresponde a ese camino.
 
 %% Ejercicio 6
@@ -148,11 +148,12 @@ cantVertices([F|T], R) :- length([F|T], N), length(F, M), R is N*M.
 %% cada caso por qué el predicado se comporta como lo hace.
 
 % Vemos que Inicio es reversible en camino2/4. Esto se debe a que es reversible en caminoConLong, que utiliza camino/4, y Inicio
-% es reversible en este predicado, porque si no viene instanciado es generado por estaLibre/2. Luego, es necesario que este instanciado para caminoAux/5.
+% es reversible en este predicado, porque si no viene instanciado es generado por estaLibre/2.
+% Entonces, si viene instanciado estaLibre lo verifica, y si no viene instanciado, estaLibre lo genera. Luego, es usado en caminoAux ya instanciado.
 
-% Vemos que Camino tambien es reversible en este predicado (si Inicio y Fin estan instanciados).
-% Si camino ya viene instanciado, se van a generar las longitudes hasta dar con la que es la del camino que vino instanciado
-% es decir, que en caminoConLong se va a chequear, primero que ese sea un camino, y luego que sea de esa longitud
+% Vemos que Camino tambien es reversible en este predicado.
+% Si Camino ya viene instanciado (y es correcto), se van a generar las longitudes hasta dar con la que es la del camino que vino instanciado
+% es decir, que en caminoConLong se va a chequear, primero que ese sea un camino, y luego que sea de esa longitud.
 % vemos que si a camino le pasamos un camino correcto ya instanciado, va a devolver true.
 
 
